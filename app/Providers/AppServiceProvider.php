@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Services\TestService;
+use App\Services\AllUsersService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -12,6 +14,14 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         //
+        app()->bind('allusers',function(){
+            return new AllUsersService();
+        });
+
+        $this->app->bind('testService',function(){
+            return new TestService('TestService Name');
+        });
+
     }
 
     /**
