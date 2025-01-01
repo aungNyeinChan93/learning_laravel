@@ -1,5 +1,6 @@
 <?php
 
+use App\Facade\TestFacade;
 use App\Facade\UserFacade;
 use App\Services\Test2;
 use App\Services\UserService;
@@ -7,6 +8,7 @@ use App\Test\Run;
 use App\Models\User;
 use App\Test\ServiceOne;
 use App\Test\ServiceTwo;
+use Illuminate\Config\Repository;
 use Illuminate\Http\Request;
 use App\Services\TestService;
 use App\Container\MyContainer;
@@ -95,7 +97,8 @@ Route::get('serviceContainer/test3',function(Test2 $test2){
     // dd($test2->name());
     $res = resolve('testService');
     // dd($res->getName(), $test2->name());
-    dd(resolve('app'));
+    dd(config('app'));
+    dd(resolve('config'));
 });
 
 // http://localhost:8000/serviceContainer/facade?name=aung
@@ -116,7 +119,23 @@ Route::get('serviceProvider',function(UserService $userService){
 
 // Facade
 Route::get('facade',function(){
-    dd(UserFacade::every());
+    dd(UserFacade::every(),TestFacade::getName());
+});
+
+// config
+Route::get('config',function(){
+    $config = resolve('config');
+    $config2 = resolve(Repository::class);
+    dd($config->get('app.name'),config('app'),$config2->get('app.env'));
+});
+
+// config/users
+Route::get('config/users',function(){
+
+    $users = config('users.allUsers.class');
+    $testService = config('users.test.class');
+
+    dd($users::all(),$testService::getName(),config('users.userModel'),config());
 });
 
 
