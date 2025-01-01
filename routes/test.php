@@ -1,6 +1,8 @@
 <?php
 
+use App\Facade\UserFacade;
 use App\Services\Test2;
+use App\Services\UserService;
 use App\Test\Run;
 use App\Models\User;
 use App\Test\ServiceOne;
@@ -103,6 +105,18 @@ Route::get('serviceContainer/facade',function(Request $request){
     $customeRquest2 = resolve(Request::class); //class or service
 
     dd($customeRquest->all(),$customeRquest2->all(),$request->all(),request()->all());  //resolve by => custome request, helper function, request facade
+});
+
+// serviceprovider
+Route::get('serviceProvider',function(UserService $userService){
+
+    $users = resolve('users');
+    dd($users->every(),$userService->find(1));
+});
+
+// Facade
+Route::get('facade',function(){
+    dd(UserFacade::every());
 });
 
 
