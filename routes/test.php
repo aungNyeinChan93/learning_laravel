@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\UserCreateEvent;
 use App\Test\Run;
 use App\Models\User;
 use App\Mail\TestMail;
@@ -7,6 +8,7 @@ use GuzzleHttp\Client;
 use App\Services\Test2;
 use App\Test\ServiceOne;
 use App\Test\ServiceTwo;
+use App\Events\TestEvent;
 use App\Jobs\TestMailJob;
 use App\Facade\TestFacade;
 use App\Facade\UserFacade;
@@ -18,6 +20,7 @@ use App\Services\AllUsersService;
 use Illuminate\Config\Repository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Console\Application;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
@@ -168,7 +171,7 @@ Route::get('guzzle/test', function () {
 });
 
 // hooks-Events
-Route::get('hooks/retrieved', action: function () {
+Route::get(uri: 'hooks/retrieved', action: function () {
     $users = User::all(); //retrieved event lsitener
     dd($users);
 });
@@ -184,13 +187,13 @@ Route::get('hooks/updated', function () {
 });
 
 // notifaciation
-Route::get('noti/test',function(){
-    $user =User::first();
+Route::get('noti/test', function () {
+    $user = User::first();
     $user->notify(new TestNotification());
     dd('Notification sent');
 });
 
-Route::get('noti/users/{id}',function($id){
+Route::get('noti/users/{id}', function ($id) {
     $user = User::find($id);
     if ($user) {
         Notification::send($user, new UserShowNotification($user));
@@ -200,10 +203,27 @@ Route::get('noti/users/{id}',function($id){
     }
 });
 
-Route::get('noti/data',function(){
+Route::get('noti/data', function () {
     $result = DB::table('notifications')->get();
     dd($result);
 });
+
+// event & listiner
+Route::get('eventAndListener', function () {
+    $user = User::first();
+    TestEvent::dispatch($user);
+    // event(new TestEvent($user));
+    dd('hit event and listener');
+});
+
+// ALL PROCESS
+Route::get('eventListener/users/create/{name}/{email}/{password}', function ($name, $email, $password) {
+    $user = User::create(['name' => $name, "email" => $email, "password" => Hash::make($password)]);
+    event(new UserCreateEvent($user));
+    dd('done');
+});
+
+
 
 
 
