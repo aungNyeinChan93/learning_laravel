@@ -223,6 +223,14 @@ Route::get('eventListener/users/create/{name}/{email}/{password}', function ($na
     dd('done');
 });
 
+// livewire
+Route::get('livewire/counter',function(){
+    return view('test.livewire');
+});
+
+Route::get('livewire/users',function(){
+    return view('test.livewire');
+});
 
 
 

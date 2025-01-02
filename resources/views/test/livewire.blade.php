@@ -4,14 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    @livewireStyles
-    <title>layout</title>
+    @livewireStyles()
+    <title>Test Livewire</title>
 </head>
 <body>
-    <h1>Layout</h1>
 
-    <livewire:UserCreate />
+    <h1>Test Livewire</h1>
+
+        <livewire:UserCreate />
+        <livewire:UserList />
 
     @livewireScripts
+
 </body>
 </html>
