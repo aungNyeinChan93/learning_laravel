@@ -47,4 +47,15 @@ class User extends Authenticatable implements WebAuthnAuthenticatable
             'password' => 'hashed',
         ];
     }
+
+    protected static function booted(): void
+    {
+        static::retrieved(function (User $user) {
+            logger('User retrieved: ' . $user->name);
+        });
+
+        static::updated(function (User $user) {
+            logger('User updated: ' . $user->name);
+        });
+    }
 }

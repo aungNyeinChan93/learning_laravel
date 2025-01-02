@@ -1,19 +1,24 @@
 <?php
 
-use App\Facade\TestFacade;
-use App\Facade\UserFacade;
-use App\Services\Test2;
-use App\Services\UserService;
 use App\Test\Run;
 use App\Models\User;
+use App\Mail\TestMail;
+use GuzzleHttp\Client;
+use App\Services\Test2;
 use App\Test\ServiceOne;
 use App\Test\ServiceTwo;
-use Illuminate\Config\Repository;
+use App\Jobs\TestMailJob;
+use App\Facade\TestFacade;
+use App\Facade\UserFacade;
 use Illuminate\Http\Request;
 use App\Services\TestService;
+use App\Services\UserService;
 use App\Container\MyContainer;
 use App\Services\AllUsersService;
+use Illuminate\Config\Repository;
 use Illuminate\Console\Application;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 
@@ -78,22 +83,22 @@ Route::get('serviceContainer/app', function () {
     dd($allUsers::all());
 });
 
-Route::get('serviceContainer/props', function (AllUsersService $allUsersService ) {
+Route::get('serviceContainer/props', function (AllUsersService $allUsersService) {
     dd($allUsersService::all());
 });
 
-Route::get('serviceContainer/test',function(){
+Route::get('serviceContainer/test', function () {
     $uses = resolve(User::class);
     dd($uses->first());
 });
 
-Route::get('serviceContainer/test2',function(Run $run){
+Route::get('serviceContainer/test2', function (Run $run) {
     $req = resolve(Request::class);
-    dd($req->all(),$run->run('Mg Mg'));
+    dd($req->all(), $run->run('Mg Mg'));
 });
 
 
-Route::get('serviceContainer/test3',function(Test2 $test2){
+Route::get('serviceContainer/test3', function (Test2 $test2) {
     // dd($test2->name());
     $res = resolve('testService');
     // dd($res->getName(), $test2->name());
@@ -102,40 +107,76 @@ Route::get('serviceContainer/test3',function(Test2 $test2){
 });
 
 // http://localhost:8000/serviceContainer/facade?name=aung
-Route::get('serviceContainer/facade',function(Request $request){
+Route::get('serviceContainer/facade', function (Request $request) {
 
     $customeRquest = resolve('request'); // key
     $customeRquest2 = resolve(Request::class); //class or service
 
-    dd($customeRquest->all(),$customeRquest2->all(),$request->all(),request()->all());  //resolve by => custome request, helper function, request facade
+    dd($customeRquest->all(), $customeRquest2->all(), $request->all(), request()->all());  //resolve by => custome request, helper function, request facade
 });
 
 // serviceprovider
-Route::get('serviceProvider',function(UserService $userService){
+Route::get('serviceProvider', function (UserService $userService) {
 
     $users = resolve('users');
-    dd($users->every(),$userService->find(1));
+    dd($users->every(), $userService->find(1));
 });
 
 // Facade
-Route::get('facade',function(){
-    dd(UserFacade::every(),TestFacade::getName());
+Route::get('facade', function () {
+    dd(UserFacade::every(), TestFacade::getName());
 });
 
 // config
-Route::get('config',function(){
+Route::get('config', function () {
     $config = resolve('config');
     $config2 = resolve(Repository::class);
-    dd($config->get('app.name'),config('app'),$config2->get('app.env'));
+    dd($config->get('app.name'), config('app'), $config2->get('app.env'));
 });
 
 // config/users
-Route::get('config/users',function(){
+Route::get('config/users', function () {
 
     $users = config('users.allUsers.class');
     $testService = config('users.test.class');
 
-    dd($users::all(),$testService::getName(),config('users.userModel'),config());
+    dd($users::all(), $testService::getName(), config('users.userModel'), config());
+});
+
+
+// mail
+Route::get('mail', function () {
+    TestMailJob::dispatch(User::find(1));
+    dd('Mail sent');
+});
+
+// guzzle
+Route::get('guzzle', function () {
+    $client = new Client();
+    $response = $client->get('https://jsonplaceholder.typicode.com/posts');
+    $data = json_decode($response->getBody()->getContents());
+    dd($data);
+});
+
+Route::get('guzzle/test', function () {
+    // return json_decode(Http::dd()->get('http://jsonplaceholder.typicode.com/posts')->getBody()->getContents());
+    return json_decode(Http::get('http://jsonplaceholder.typicode.com/posts')->getBody());
+});
+
+// hooks-Events
+Route::get('hooks/retrieved', action: function () {
+    $users = User::all(); //retrieved event lsitener
+    dd($users);
+});
+
+Route::get('hooks/updated', function () {
+    $user = User::find(1);  //updated event listener
+    $user->update(
+        [
+            'name' => 'Aung Aung',
+        ]
+    );
+    dd(vars: $user);
 });
 
 
