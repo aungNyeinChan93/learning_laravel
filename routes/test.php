@@ -16,10 +16,14 @@ use App\Services\UserService;
 use App\Container\MyContainer;
 use App\Services\AllUsersService;
 use Illuminate\Config\Repository;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Console\Application;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
+use App\Notifications\TestNotification;
+use App\Notifications\UserShowNotification;
+use Illuminate\Support\Facades\Notification;
 
 
 // service container
@@ -178,6 +182,29 @@ Route::get('hooks/updated', function () {
     );
     dd(vars: $user);
 });
+
+// notifaciation
+Route::get('noti/test',function(){
+    $user =User::first();
+    $user->notify(new TestNotification());
+    dd('Notification sent');
+});
+
+Route::get('noti/users/{id}',function($id){
+    $user = User::find($id);
+    if ($user) {
+        Notification::send($user, new UserShowNotification($user));
+        dd('User Notification sent');
+    } else {
+        dd('User not found');
+    }
+});
+
+Route::get('noti/data',function(){
+    $result = DB::table('notifications')->get();
+    dd($result);
+});
+
 
 
 
