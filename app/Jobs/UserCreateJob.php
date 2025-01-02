@@ -7,6 +7,8 @@ use App\Mail\UserCreateMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\UserCreateNotification;
 
 class UserCreateJob implements ShouldQueue
 {
@@ -26,5 +28,8 @@ class UserCreateJob implements ShouldQueue
     public function handle(): void
     {
         Mail::to($this->user->email)->send(new UserCreateMail($this->user));
+
+        Notification::send($this->user,new UserCreateNotification($this->user));
+
     }
 }
